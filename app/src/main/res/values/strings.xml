@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SRecyclerView</string>
+    <string name="loading">正在加载...</string>
+    <string name="no_data">已全部加载</string>
 </resources>
