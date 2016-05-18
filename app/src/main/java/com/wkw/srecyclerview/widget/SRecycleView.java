@@ -101,7 +101,7 @@ public class SRecycleView<T> extends LinearLayout {
     public class SRecyAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public boolean hasMore;
-        protected List<T> mList;
+        protected List<T> mList = new ArrayList<>();
         protected boolean hasHeader = false, isLoading;
         private static final int TYPE_FOOTER = Integer.MIN_VALUE;
         private static final int TYPE_HEADER = Integer.MAX_VALUE;
@@ -113,7 +113,6 @@ public class SRecycleView<T> extends LinearLayout {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             try {
-
                 if (viewType == TYPE_FOOTER) {
                     View view = LayoutInflater.from(mContext).inflate(R.layout.layout_recycler_footer, parent, false);
                     return new FooterViewHolder(view);
@@ -135,7 +134,7 @@ public class SRecycleView<T> extends LinearLayout {
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            if (position + 1 == getItemCount()) {
+            if (holder instanceof FooterViewHolder) {
                 if (hasMore) {
                     ((FooterViewHolder) holder).mProgressBar.setVisibility(View.VISIBLE);
                     ((FooterViewHolder) holder).tv_content.setText(R.string.loading);
@@ -144,14 +143,8 @@ public class SRecycleView<T> extends LinearLayout {
                     ((FooterViewHolder) holder).tv_content.setText(R.string.no_data);
                 }
             } else  {
-                if (position == 0 && hasHeader) {
-                    ((BaseViewHolder)holder).onBindViewHolder(holder.itemView, mHeaderData, position);
-                } else {
-                    ((BaseViewHolder)holder).onBindViewHolder(holder.itemView, mList.get(position - (hasHeader ? 1 : 0)), position);
-                }
-
-//                ((BaseViewHolder)holder).onBindViewHolder(holder.itemView,
-//                        (hasHeader && position == 0) ? mHeaderData : mList.get(position - (hasHeader ? 1 : 0)), position);
+                ((BaseViewHolder)holder).onBindViewHolder(holder.itemView,
+                        (hasHeader && position == 0) ? mHeaderData : mList.get(position - (hasHeader ? 1 : 0)), position);
 
             }
         }
@@ -171,27 +164,21 @@ public class SRecycleView<T> extends LinearLayout {
             public void setItemView(int itemId, Class<? extends BaseViewHolder> itemClass) {
             this.mItemLayoutId = itemId;
             this.hasMore = true;
-            this.mList = new ArrayList<>();
             this.mItemViewClass = itemClass;
 
         }
 
         public void setHeaderView(int headerId, Class<? extends BaseViewHolder> headerClass, Object o) {
-            if (headerClass == null) {
-                this.hasHeader = false;
-            } else {
                 this.hasHeader = true;
                 this.mHeaderLayoutId = headerId;
                 this.mHeaderViewClass = headerClass;
                 this.mHeaderData = o;
-            }
         }
 
         public void setData(List<T> data, boolean isRefreshData) {
             if (data == null) return;
             this.hasMore = data.size() == MAX_PAGE_SIZE;
             this.isLoading = false;
-            if (mList == null) mList = new ArrayList<>();
             if (isRefreshData) {
                 mList.clear();
                 this.hasMore = true;
@@ -205,7 +192,7 @@ public class SRecycleView<T> extends LinearLayout {
 
     }
 
-    public class FooterViewHolder extends RecyclerView.ViewHolder {
+    public static class FooterViewHolder extends RecyclerView.ViewHolder {
 
         private final ProgressBar mProgressBar;
         private final TextView tv_content;
